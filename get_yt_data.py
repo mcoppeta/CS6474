@@ -113,11 +113,6 @@ def main():
     PAGES = 2
     NPT = 'nextPageToken'
 
-    #videoId="kCqN4xdkrbY" # many comments (BLR)
-    #videoId="01tWk1qSX4I" # 14 comments
-    #videoId="GDENKNxgycM" # no comments
-
-
     for videoId in video_ids:
         if videoId in written_ids:
             print("skipping:\t", videoId)
