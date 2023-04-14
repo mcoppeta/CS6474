@@ -106,10 +106,6 @@ def reformat_str(word):
 
 def main():
     video_data, written_ids, video_ids = load_data()
-    print(video_data)
-    print()
-    print(written_ids)
-    print()
     PAGES = 2
     NPT = 'nextPageToken'
 
@@ -149,7 +145,6 @@ def main():
 
     write(video_data, written_ids)
 
-    #print(video_data)
     print('\n', len(video_data))
 
 if __name__ == "__main__":
