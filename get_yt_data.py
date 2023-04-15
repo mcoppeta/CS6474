@@ -55,7 +55,7 @@ def get_stats(videoId):
     responseStats = request.execute()
     return responseStats
 
-def handle_response(response, title, views, likes, comments):
+def handle_response(response, title, views, likes, comments, videoAboutApple, videoAboutSamsung):
     items = []
     for thread in response['items']:
         threadData = thread['snippet']
@@ -66,8 +66,7 @@ def handle_response(response, title, views, likes, comments):
         timestamp = comment['publishedAt']
         text = comment['textOriginal']
         text = reformat_str(text)
-
-        item = [text, numLikes, numReplies, timestamp, title, views, likes, comments]
+        item = [text, numLikes, numReplies, timestamp, title, views, likes, comments, videoAboutApple, videoAboutSamsung]
         items.append(item)
     return items
 
@@ -81,7 +80,7 @@ def write(data, ids):
 def load_data():
     data = np.loadtxt('./youtube_data.txt', dtype=object, encoding='utf-8', delimiter="|", comments=None)
     if len(data) == 0:
-        data = [['comment', 'commentLikes', 'commentReplies', 'commentTimestamp', 'videoTitle', 'videoViews', 'videoLikes', 'videoComments']]
+        data = [['comment', 'commentLikes', 'commentReplies', 'commentTimestamp', 'videoTitle', 'videoViews', 'videoLikes', 'videoComments', 'videoAboutApple', 'videoAboutSamsung']]
     
     with open('./id_written.txt', 'r') as file:
         rawids = file.read().split('\n')
@@ -95,21 +94,27 @@ def load_data():
         get_ids = []
         for idx in rawids:
             if idx:
-                get_ids.append(idx)
+                get_ids.append(idx.split(' ')) # aboutApple, aboutSamsung, videoId
 
     return data, written_ids, get_ids
 
 def reformat_str(word):
     updated = re.sub(r'\|', ' ', word)
     updated = re.sub(r'\n', ' ', updated)
+    updated = re.sub(r'\r', ' ', updated)
     return updated
 
 def main():
-    video_data, written_ids, video_ids = load_data()
+    video_data, written_ids, idData = load_data()
+    
     PAGES = 10
     NPT = 'nextPageToken'
 
-    for videoId in video_ids:
+    for idInfo in idData:
+        aboutApple = idInfo[0]
+        aboutSamsung = idInfo[1]
+        videoId = idInfo[2]
+
         if videoId in written_ids:
             print("skipping:\t", videoId)
             continue
@@ -123,7 +128,7 @@ def main():
             comments = stats['statistics']['commentCount']
 
             response = api_call(videoId)
-            response_data = handle_response(response, title, views, likes, comments)
+            response_data = handle_response(response, title, views, likes, comments, aboutApple, aboutSamsung)
             if len(response_data) > 0:
                 video_data = np.vstack([video_data, response_data])
 
@@ -131,7 +136,7 @@ def main():
                 npt = response[NPT]
                 for i in range(PAGES - 1):
                     response = api_call(videoId, npt=npt)
-                    response_data = handle_response(response, title, views, likes, comments)
+                    response_data = handle_response(response, title, views, likes, comments, aboutApple, aboutSamsung)
                     if len(response_data) > 0:
                         video_data = np.vstack([video_data, response_data])
                     else:
