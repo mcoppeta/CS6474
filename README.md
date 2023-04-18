@@ -1,6 +1,9 @@
 # CS6474
 CS 6474 Project
 
+Libraries used:
+sklearn
+vaderSentiment
 
 Put developer key in get_yt_data.py script.
 
